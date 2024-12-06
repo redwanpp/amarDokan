@@ -14,7 +14,7 @@
     }
 
     .form-signin input[type="email"] {
-        margin-bottom: -10px;
+        margin-bottom: 5px;
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
     }

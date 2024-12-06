@@ -14,6 +14,12 @@ class AuthManager extends Controller
         return view('auth.login');
     }
 
+    function logout()
+    {
+        Auth::logout();
+        return redirect()->route('login');
+    }
+
     function loginPost(Request $request)
     {
         $request->validate([
@@ -23,7 +29,7 @@ class AuthManager extends Controller
 
         $credentials = $request->only('email', 'password');
         if (Auth::attempt($credentials)) {
-            return redirect()->intended("home");
+            return redirect()->intended(route("home"));
         }
         return redirect("login")
             ->with('error', 'Invalid Email or Password');
@@ -42,7 +48,7 @@ class AuthManager extends Controller
              'password' => 'required',
          ]);
          $user = new User();
-         $user->name = $request->nema;
+         $user->name = $request->name;
          $user->email = $request->email;
          $user->password = Hash::make($request->password);
 

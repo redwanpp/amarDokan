@@ -14,7 +14,7 @@
     }
 
     .form-signin input[type="email"] {
-        margin-bottom: -10px;
+        margin-bottom: 5px;
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
     }
@@ -35,7 +35,7 @@
                  width="72" height="57">
             <h1 class="h3 mb-3 fw-normal">Please signup</h1>
 
-            <div class="form-floating">
+            <div class="form-floating" style="margin-bottom: 5px">
                 <input name="name" type="text" class="form-control"
                        id="floatingInputName"
                        placeholder="Enter name">

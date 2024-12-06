@@ -10,6 +10,9 @@ Route::get('/', function () {
 Route::get("login", [AuthManager::class, "login"])
     ->name("login");
 
+Route::get("logout", [AuthManager::class, "logout"])
+    ->name("logout");
+
 Route::post("auth", [AuthManager::class, "loginPost"])
     ->name("login.post");
 
