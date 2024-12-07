@@ -20,3 +20,14 @@ Route::get("register", [AuthManager::class, "register"])
 
 Route::post("registerPost", [AuthManager::class, "registerPost"])
     ->name('register.post');
+
+Route::get("/product/{slug}", [ProductsManager::class, 'details'])
+    ->name("product.details");
+
+Route::middleware("auth")->group(function () {
+    Route::get("/cart/{id}", [ProductsManager::class, 'addToCart'])
+        ->name("cart.add");
+
+    Route::get("/cart", [ProductsManager::class, 'showCart'])
+        ->name("cart.show");
+});
