@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Orders;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Stripe\StripeClient;
 
 class OrderManager extends Controller
 {
@@ -27,11 +28,13 @@ class OrderManager extends Controller
                 DB::raw(
                     "count(*) as quantity"),
                     'products.price',
+                    'products.title',
                 )
             ->where("user_id", auth()->user()->id)
             ->groupBy(
                 'product_id',
-                'products.price')
+                'products.price',
+            'products.title')
             ->get();
 
         if($cartItems->isEmpty()) {
@@ -41,11 +44,22 @@ class OrderManager extends Controller
         $productIds = array();
         $quantities = array();
         $totalPrice = 0;
+        $lineItems = array();
 
         foreach ($cartItems as $cartItem) {
             $productIds[] = $cartItem->product_id;
             $quantities[] = $cartItem->quantity;
             $totalPrice += $cartItem->price * $cartItem->quantity;
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'USD',
+                    'product_data' => [
+                        'name' => $cartItem->title,
+                    ],
+                    'unit_amount' => $cartItem->price * 100,
+                ],
+                'quantity' => $cartItem->quantity,
+            ];
         }
 
         $order = new Orders();
@@ -58,8 +72,31 @@ class OrderManager extends Controller
         $order->total_price = json_encode($totalPrice);
         if ($order->save()) {
             DB::table('cart')->where('user_id', auth()->user()->id)->delete();
-            return redirect()->route('cart.show')->with('success', 'Order placed successfully');
+            $stripe = new StripeClient(config('app.stripe_secret'));
+
+            $checkoutSession = $stripe->checkout->sessions->create([
+               'success_url' => route('payment.success', ['order_id' => $order->id]),
+                'cancel_url' => route('payment.error'),
+                'payment_method_types' => ['card'],
+                'line_items' => $lineItems,
+                'mode' => 'payment',
+                'customer_email' => auth()->user()->email,
+                'metadata' => [
+                    'order_id' => $order->id,
+                ]
+            ]);
+            return redirect($checkoutSession->url);
         }
         return redirect(route('cart.show'))->with('error', 'Error occurred while processing your order');
+    }
+
+    function paymentError()
+    {
+        return "error";
+    }
+
+    function paymentSuccess($order_id)
+    {
+        return "success " . $order_id;
     }
 }
