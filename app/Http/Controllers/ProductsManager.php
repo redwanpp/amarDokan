@@ -55,7 +55,12 @@ class ProductsManager extends Controller
                 'products.image',
                 'products.slug')
             ->paginate(3);
+        if($cartItems->isEmpty()){
+            return view('emptyCart');
+        }
 
         return view('cart', compact('cartItems'));
+
+
     }
 }
